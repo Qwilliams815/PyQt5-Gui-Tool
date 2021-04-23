@@ -15,7 +15,7 @@ profiles = set()
 if not os.path.isfile('save.txt'):
     mem = open('save.txt', 'w+')
 
-        
+
 
 #with open('save.txt', 'r') as f:
 #    for application in apps:
@@ -35,6 +35,7 @@ class tool_window(qtw.QMainWindow, Ui_MainWindow):
         #self.setStyleSheet("background-color: grey;")
 
         #lOADS SAVED PREVIOUSLY ADDED APPS
+        
         with open('save.txt', 'r') as f:
             tempApps = f.read()
             tempApps = tempApps.split(',')
@@ -55,6 +56,9 @@ class tool_window(qtw.QMainWindow, Ui_MainWindow):
 
         # APPLICATIONS/LISTS
         self.appButton.clicked.connect(self.add_app)
+
+        self.current_tab = self.tabWidget.currentWidget()
+        self.current_list = qtw.QListWidget(self.current_tab)
         
         # LAUNCH BUTTON
         #self.launchButton.clicked.connect(self.launch)
@@ -83,8 +87,10 @@ class tool_window(qtw.QMainWindow, Ui_MainWindow):
             self.proNameEdit.clear()
 
             #CREATES LISTWIDGET WITHIN TAB
-            self.newTab_listWidget = qtw.QListWidget(self.new_tab)
+            self.newTab_listWidget = qtw.QListWidget(self.current_tab)
             self.newTab_listWidget.setGeometry(qtc.QRect(20, 10, 281, 441))
+            # self.newTab_listWidget = qtw.QListWidget(self.new_tab)
+            # self.newTab_listWidget.setGeometry(qtc.QRect(20, 10, 281, 441))
             #self.newTab_listWidget.setObjectName(f"{proName}_listWidget")
             #print(self.f"{proName}_listWidget")
 
@@ -101,6 +107,10 @@ class tool_window(qtw.QMainWindow, Ui_MainWindow):
         self.tabWidget.removeTab(index)
 
     def add_app(self):
+        #self.current_tab = self.tabWidget.setCurrentWidget(self.tab_2)
+        
+        
+        
 
         #if os.path.isfile('save.txt'):
         
@@ -120,8 +130,9 @@ class tool_window(qtw.QMainWindow, Ui_MainWindow):
             # self.seperate_listWidget.addItem(fileName[0])
             for profile in profiles:
                 pass
-
-            self.tab1_listWidget.addItem(fileName[0])
+            
+            self.current_list.addItem("hello")
+            #self.qtw.QListWidget(self.self.tabWidget.currentWidget()).addItem('Hello')
             #$self.currentListWidget = self.tabWidget.tabText(self.tabWidget.currentIndex()) + "_listWidget"
             #$self.currentListWidget.addItem(fileName[0])
 
@@ -150,12 +161,16 @@ class tool_window(qtw.QMainWindow, Ui_MainWindow):
         #print(self.tabWidget.currentWidget.tab1_listWidget)
 
         #print([tab for tab in range(0, self.tabWidget.count()) if self.tabWidget.currentIndex() == tab])
-        for tab in range(0, self.tabWidget.count()):
-            if self.tabWidget.currentIndex() == tab:
-                self.newTab_listWidget.addItem("Hello")
-                print(self.tabWidget.currentIndex())
+        # 1 for tab in range(0, self.tabWidget.count()):
+        # 1     if self.tabWidget.currentIndex() == tab:
+        # 1         self.newTab_listWidget.addItem("Hello")
+        # 1         print(self.tabWidget.currentIndex())
         #        self.tabWidget.count[tab]
         #print(self.findChildren(self.tabWidget))
+        
+        print(self.tabWidget.indexOf(self.tabWidget.currentWidget()))
+        #print(self.tabWidget.currentWidget())
+
 
 
 if __name__ == '__main__':
