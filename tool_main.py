@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import QWidget
 from PyQt5.QtCore import QSettings
 
 # ALL APPS DUMP
-apps = set()
+apps = []
 #profiles = set()
 
 # CREATING A SAVE FILE FOR THE ADDED APPS
@@ -51,13 +51,25 @@ class tool_window(qtw.QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         #self.setStyleSheet("background-color: grey;")
 
-        # lOADS SAVED PREVIOUSLY ADDED APPS
+        # lOADS SAVED PREVIOUSLY ADDED PROFILES / APPS
+        i = 0
         for key in profiles:
             self.new_tab = qtw.QWidget()
-            self.new_tab.setObjectName(f"{key}")
+            #self.tabWidget.addTab(self.new_tab, key)
+            #self.new_tab.setObjectName(f"{key}{i}")
             self.tabWidget.addTab(self.new_tab, key)
+            #self.tabWidget.addTab(self.tabWidget.findChild(f"{key}{i}"), key)
+
             self.newTab_listWidget = qtw.QListWidget(self.new_tab)
             self.newTab_listWidget.setGeometry(qtc.QRect(20, 10, 281, 441))
+
+            for item in profiles[key]:
+                self.newTab_listWidget.addItem(item)
+
+            self.new_tab.setObjectName(f"{key}{i}")
+            self.newTab_listWidget.setObjectName(f"newTab_listWidget{i}")
+
+            i += 1
             
 
             #list_name = f"{key}_list"
@@ -66,8 +78,9 @@ class tool_window(qtw.QMainWindow, Ui_MainWindow):
             #self.list_name = qtw.QListWidget(self.new_tab)
             #self.list_name.setGeometry(qtc.QRect(20, 10, 281, 441))
 
-            #for app in profiles[key]:
+            for app in profiles[key]:
             #    self.list_name.addItem(app)
+                apps.append(app)
             
         
         # PROFILE/TABS
@@ -90,8 +103,28 @@ class tool_window(qtw.QMainWindow, Ui_MainWindow):
         
         # LAUNCH BUTTON
         #self.launchButton.clicked.connect(self.launch)
-        self.launchButton.clicked.connect(self.test)
+        self.launchButton.clicked.connect(self.launch)
         
+        # TEST
+
+        #5 i = 0
+#5 
+        #5 self.new_tab1 = qtw.QWidget()
+        #5 self.tabWidget.addTab(self.new_tab1, f"new1")
+#5 
+        #5 self.new_tab2 = qtw.QWidget()
+        #5 self.tabWidget.addTab(self.new_tab2, "new2")
+#5 
+        #5 self.newTab_listWidget = qtw.QListWidget(self.new_tab1)
+        #5 self.newTab_listWidget.setGeometry(qtc.QRect(20, 10, 281, 441))
+        #5 self.newTab_listWidget.setObjectName(f"newTab_listWidget{i}")
+#5 
+        #5 i += 1
+#5 
+        #5 self.newTab_listWidget = qtw.QListWidget(self.new_tab2)
+        #5 self.newTab_listWidget.setGeometry(qtc.QRect(20, 10, 281, 441))
+        #5 self.newTab_listWidget.setObjectName(f"newTab_listWidget{i}")
+
 
 
 
@@ -138,11 +171,26 @@ class tool_window(qtw.QMainWindow, Ui_MainWindow):
             profiles[proName] = []
             with open('save.json', 'w') as outfile:
                 json.dump(profiles, outfile)
+
             # CREATES LISTWIDGET WITHIN TAB
             #self.newTab_listWidget = qtw.QListWidget(self.current_tab)
             #self.newTab_listWidget.setGeometry(qtc.QRect(20, 10, 281, 441))
             self.newTab_listWidget = qtw.QListWidget(self.new_tab)
             self.newTab_listWidget.setGeometry(qtc.QRect(20, 10, 281, 441))
+
+            # i = tabwidget.getindexof the just created tab
+            i = self.tabWidget.indexOf(self.new_tab)
+
+            self.new_tab.setObjectName(f"{key}{i}")
+            self.newTab_listWidget.setObjectName(f"newTab_listWidget{i}")
+
+            #i = 0
+            #for profile in range(len(profiles)):
+            #    self.newTab_listWidget = qtw.QListWidget(self.new_tab)
+            #    self.newTab_listWidget.setObjectName(f"{i}")
+            #    i += 1
+
+
             #self.newTab_listWidget.setObjectName(f"{proName}_listWidget")
             #print(self.f"{proName}_listWidget")
             
@@ -166,13 +214,17 @@ class tool_window(qtw.QMainWindow, Ui_MainWindow):
         #for profile in profiles:
         #    if profile == self.tabWidget.tabText(self.tabWidget.currentIndex()):
         #        pass
-
+        apps.append(fileName[0])
         # DUPLICATE FILE QUALIFIER
     #if fileName[0] not in apps:
         #apps.add(fileName[0])
-        current_tab = self.tabWidget.tabText(self.tabWidget.currentIndex())
-        profiles[current_tab].append(fileName[0])
+        current_tab_name = self.tabWidget.tabText(self.tabWidget.currentIndex())
+        current_tab_index = self.tabWidget.currentIndex()
+        self.current_list = self.tabWidget.findChild(QListWidget, f"newTab_listWidget{current_tab_index}")
+        self.current_list.addItem(fileName[0])
+        profiles[current_tab_name].append(fileName[0])
         print(profiles)
+
         with open('save.json', 'w') as outfile:
             json.dump(profiles, outfile)
         # self.seperate_listWidget.addItem(fileName[0])
@@ -194,13 +246,16 @@ class tool_window(qtw.QMainWindow, Ui_MainWindow):
         print(apps)
 
     def launch(self):
-        for app in apps:
+        #for app in apps:
+        #    os.startfile(app)
+        current_tab_name = self.tabWidget.tabText(self.tabWidget.currentIndex())
+        for app in profiles[current_tab_name]:
             os.startfile(app)
 
 
     def test(self):
         #print(self.tabWidget.tabText(self.tabWidget.currentIndex()))
-        #print(self.tabWidget.currentIndex())
+        print(self.tabWidget.currentIndex())
         #print(self.tabWidget.tabText(self.tabWidget.currentIndex()) + "_listWidget")
         #print(self.tabWidget.currentWidget.tab1_listWidget)
 
@@ -218,7 +273,31 @@ class tool_window(qtw.QMainWindow, Ui_MainWindow):
         #print(type(self.tabWidget))
         #print(type(self.tab))
         #print(type(self.tab1_listWidget))
-        print(self.tabWidget.findChildren(self.tab, "tab"))
+
+        #print(self.tabWidget.findChildren(self.tab, "tab"))
+
+        # 2 i = 0
+        # 2 for profile in range(len(profiles)):
+        # 2     list_id = i
+        # 2     if i == self.tabWidget.currentIndex():
+        # 2         child = self.findChild(QListWidget, f"{i}")
+        # 2         print(type(child))
+        # 2     i += 1
+
+
+        active_list_index = self.tabWidget.currentIndex()
+        #list_list = self.findChildren(QListWidget, "newTab_listWidget")
+        current_list = self.findChild(QListWidget, f"newTab_listWidget{active_list_index}")
+        current_list.addItem('Hello')
+
+        # I WAS TRYING TO FIGURE OUT HOW TO PRINT THE NAME OF THE CURRENT QLIST WIDGET. MAYBE TRY RETURNING THE CHILDREN OF THE TABWIDGET.CURRENTiNDEX???
+
+        #list_ = self.findChild(QListWidget, "tab1_listWidget")
+
+        #for i in range(len(apps)):
+        #    child = self.findChild(QListWidget, f"tabList_{i}")
+        #    counter = int(child.text())
+        #    child.setText(str(counter+1))
 
 
 
