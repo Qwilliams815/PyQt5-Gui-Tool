@@ -4,7 +4,7 @@ import json
 from tool import Ui_MainWindow
 from PyQt5 import QtWidgets as qtw
 from PyQt5 import QtCore as qtc
-from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QFileDialog, QListWidgetItem, QTabWidget
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtWidgets import QListWidget
 from PyQt5.QtWidgets import QWidget
@@ -37,6 +37,24 @@ class tool_window(qtw.QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         #self.setStyleSheet("background-color: grey;")
 
+        if profiles == {}:
+            #
+            self.tut_tab = qtw.QWidget()
+            self.tabWidget.addTab(self.tut_tab, "Get Started")
+
+            # CREATES LISTWIDGET WITHIN TAB
+            self.newTab_listWidget = qtw.QListWidget(self.tut_tab)
+            self.newTab_listWidget.setGeometry(qtc.QRect(20, 10, 281, 441))
+            self.newTab_listWidget.addItem("Hello!")
+            self.newTab_listWidget.addItem("Welcome to my BootUp Tool 1.0")
+            self.newTab_listWidget.addItem("To get started,")
+            self.newTab_listWidget.addItem("- Enter a profile name")
+            self.newTab_listWidget.addItem('- Hit Enter or "Add Profile"')
+            self.newTab_listWidget.addItem("- Select any apps you wish to boot")
+            self.newTab_listWidget.addItem("- Rinse and repeat!")
+            
+            #
+
 
         # lOADS ANY PREVIOUSLY SAVED ADDED PROFILES / APPS
         i = 0
@@ -55,7 +73,7 @@ class tool_window(qtw.QMainWindow, Ui_MainWindow):
                 self.newTab_listWidget.addItem(item)
 
             # SETS NEW OBJECT NAMES FOR ITERATION PURPOSES
-            self.new_tab.setObjectName(f"{key}{i}")
+            self.new_tab.setObjectName(f"{key}")
             self.newTab_listWidget.setObjectName(f"newTab_listWidget{i}")
 
             i += 1
@@ -76,7 +94,7 @@ class tool_window(qtw.QMainWindow, Ui_MainWindow):
 
         
         # LAUNCH BUTTON FUNC
-        self.launchButton.clicked.connect(self.test)
+        self.launchButton.clicked.connect(self.launch)
 
 
     # BUTTON FUNCTIONS / METHODS
@@ -85,7 +103,6 @@ class tool_window(qtw.QMainWindow, Ui_MainWindow):
 
         # PROFILE NAME
         proName = self.proNameEdit.text()
-
 
         # EMPTY PROFILE NAME CHECKER
         if proName == "":
@@ -104,20 +121,9 @@ class tool_window(qtw.QMainWindow, Ui_MainWindow):
             x = msg.exec_()
             self.proNameEdit.clear()
 
-        # NO PREVIOUS JSON DATA CHECKER
-        #elif profiles == {}:
-#
-        #    self.new_tab = qtw.QWidget()
-        #    self.tabWidget.addTab(self.new_tab, proName)
-#
-        #    # CREATES A LIST WIDGET FOR EACH TAB
-        #    self.newTab_listWidget = qtw.QListWidget(self.new_tab)
-        #    self.newTab_listWidget.setGeometry(qtc.QRect(20, 10, 281, 441))
-#
-        #    self.new_tab.setObjectName(f"{proName}{0}")
-        #    self.newTab_listWidget.setObjectName(f"newTab_listWidget{0}")
-#
-        else:
+        else: 
+
+    
             # CREATES NEW TAB
             self.new_tab = qtw.QWidget()
             self.tabWidget.addTab(self.new_tab, f"{proName}")
@@ -126,11 +132,18 @@ class tool_window(qtw.QMainWindow, Ui_MainWindow):
             # CREATES LISTWIDGET WITHIN TAB
             self.newTab_listWidget = qtw.QListWidget(self.new_tab)
             self.newTab_listWidget.setGeometry(qtc.QRect(20, 10, 281, 441))
-            self.newTab_listWidget.addItem("HEllo")
+            #self.newTab_listWidget.addItem("HELLO")
 
 
-            i = self.tabWidget.indexOf(self.new_tab)
+            try:
+                if self.tabWidget.indexOf(self.tut_tab) == 0:
+                    self.tabWidget.removeTab(0)
+            except:
+                pass
             
+            i = self.tabWidget.indexOf(self.new_tab)
+            print(i)
+
             # SAVES TAB WITH EMPTY LIST AS KEY VALUE PAIR IN .JSON SAVE FILE
             profiles[proName] = []
             with open('save.json', 'w') as outfile:
@@ -138,10 +151,9 @@ class tool_window(qtw.QMainWindow, Ui_MainWindow):
 
 
             # SETS NEW OBJECT NAMES FOR ITERATION PURPOSES
-            #self.new_tab.setObjectName(self.tabWidget.tabText(self.tabWidget.currentIndex() + i))
-            #self.new_tab.setObjectName(f"{proName}{i}")
-            #self.newTab_listWidget.setObjectName(f"newTab_listWidget{i}")
-            
+            self.new_tab.setObjectName(f"{proName}")
+            self.newTab_listWidget.setObjectName(f"newTab_listWidget{i}")
+        
 
     def add_app(self):
         
@@ -150,12 +162,17 @@ class tool_window(qtw.QMainWindow, Ui_MainWindow):
 
         # GATHERS CURRENT TAB/LIST FOR APPENDING THE APP
         current_tab_name = self.tabWidget.tabText(self.tabWidget.currentIndex())
+        print("Current tab Name: ", current_tab_name)
         current_tab_index = self.tabWidget.currentIndex()
+        print("Current tab index: ", current_tab_index)
         self.current_list = self.tabWidget.findChild(QListWidget, f"newTab_listWidget{current_tab_index}")
+        print(self.current_list)
+
 
         # APPENDS APP TO TAB LIST AND .JSON SAVE FILE
-        self.current_list.addItem(fileName[0])
         profiles[current_tab_name].append(fileName[0])
+        self.current_list.addItem(fileName[0])
+        print("Added to List")
 
         with open('save.json', 'w') as outfile:
             json.dump(profiles, outfile)
@@ -163,9 +180,19 @@ class tool_window(qtw.QMainWindow, Ui_MainWindow):
 
     def remove_tab(self, index):
 
-        removed_tab = self.tabWidget.tabText(index)
-        del profiles[removed_tab]
+        self.removed_tab = self.tabWidget.tabText(index)
+        self.removed_tab_list = self.tabWidget.findChild(QListWidget, f"newTab_listWidget{index}")
+        del profiles[self.removed_tab]
+
+        # REMOVES TAB/LISTWIDGET FROM GUI
         self.tabWidget.removeTab(index)
+        self.removed_tab_list.setParent(None)
+
+        i = 0
+        for self.list in self.tabWidget.findChildren(QListWidget):
+            self.list.setObjectName(f"newTab_listWidget{i}")
+            i += 1
+
         with open('save.json', 'w') as outfile:
             json.dump(profiles, outfile)
 
@@ -177,15 +204,10 @@ class tool_window(qtw.QMainWindow, Ui_MainWindow):
             os.startfile(app)
 
     def test(self):
+        pass
 
-        self.new_tab = qtw.QWidget()
-        self.tabWidget.addTab(self.new_tab, "test")
-        self.proNameEdit.clear()
+            
 
-        # CREATES LISTWIDGET WITHIN TAB
-        self.newTab_listWidget = qtw.QListWidget(self.new_tab)
-        self.newTab_listWidget.setGeometry(qtc.QRect(20, 10, 281, 441))
-        self.newTab_listWidget.addItem("Hello")
 
 
 if __name__ == '__main__':
