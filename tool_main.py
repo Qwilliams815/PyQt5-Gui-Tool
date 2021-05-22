@@ -1,7 +1,7 @@
 import sys
 import os
 import json
-from tool import Ui_MainWindow
+from tool_ui_v1 import Ui_MainWindow
 from PyQt5 import QtWidgets as qtw
 from PyQt5 import QtCore as qtc
 from PyQt5.QtWidgets import QFileDialog, QListWidgetItem, QTabWidget
@@ -33,27 +33,30 @@ class tool_window(qtw.QMainWindow, Ui_MainWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-
         self.setupUi(self)
-        #self.setStyleSheet("background-color: grey;")
 
+        # STYLING TWEAKS
+        if len(profiles) > 2:
+                self.tabWidget.setUsesScrollButtons(True)
+
+        # LOADING A WELCOME MESSAGE QLISTWIDGET
         if profiles == {}:
-            #
+            
             self.tut_tab = qtw.QWidget()
             self.tabWidget.addTab(self.tut_tab, "Get Started")
 
             # CREATES LISTWIDGET WITHIN TAB
             self.newTab_listWidget = qtw.QListWidget(self.tut_tab)
-            self.newTab_listWidget.setGeometry(qtc.QRect(20, 10, 281, 441))
+            self.newTab_listWidget.setGeometry(qtc.QRect(12, 15, 310, 310))
             self.newTab_listWidget.addItem("Hello!")
             self.newTab_listWidget.addItem("Welcome to my BootUp Tool 1.0")
-            self.newTab_listWidget.addItem("To get started,")
-            self.newTab_listWidget.addItem("- Enter a profile name")
-            self.newTab_listWidget.addItem('- Hit Enter or "Add Profile"')
+            self.newTab_listWidget.addItem("To get started:")
+            self.newTab_listWidget.addItem("- Enter a Profile Name")
+            self.newTab_listWidget.addItem('- Hit Enter or click "Add Profile"')
             self.newTab_listWidget.addItem("- Select any apps you wish to boot")
             self.newTab_listWidget.addItem("- Rinse and repeat!")
+            self.tabWidget.setTabsClosable(False)
             
-            #
 
 
         # lOADS ANY PREVIOUSLY SAVED ADDED PROFILES / APPS
@@ -66,7 +69,7 @@ class tool_window(qtw.QMainWindow, Ui_MainWindow):
 
             # CREATES A LIST WIDGET FOR EACH TAB
             self.newTab_listWidget = qtw.QListWidget(self.new_tab)
-            self.newTab_listWidget.setGeometry(qtc.QRect(20, 10, 281, 441))
+            self.newTab_listWidget.setGeometry(qtc.QRect(12, 15, 310, 310))
 
             # APPENDS ANY APPS TO SAID TAB'S LIST WIDGET
             for item in profiles[key]:
@@ -82,7 +85,6 @@ class tool_window(qtw.QMainWindow, Ui_MainWindow):
         # PROFILE/TABS BUTTON FUNC / SPECS
         self.proButton.clicked.connect(self.add_tab)
         self.proNameEdit.returnPressed.connect(self.add_tab)
-        self.tabWidget.setTabsClosable(True)
         self.tabWidget.setMovable(False)
 
         # EMITS THE INDEX OF WHICH TAB IS REQUESTING CLOSURE
@@ -122,8 +124,6 @@ class tool_window(qtw.QMainWindow, Ui_MainWindow):
             self.proNameEdit.clear()
 
         else: 
-
-    
             # CREATES NEW TAB
             self.new_tab = qtw.QWidget()
             self.tabWidget.addTab(self.new_tab, f"{proName}")
@@ -131,9 +131,7 @@ class tool_window(qtw.QMainWindow, Ui_MainWindow):
 
             # CREATES LISTWIDGET WITHIN TAB
             self.newTab_listWidget = qtw.QListWidget(self.new_tab)
-            self.newTab_listWidget.setGeometry(qtc.QRect(20, 10, 281, 441))
-            #self.newTab_listWidget.addItem("HELLO")
-
+            self.newTab_listWidget.setGeometry(qtc.QRect(12, 15, 310, 310))
 
             try:
                 if self.tabWidget.indexOf(self.tut_tab) == 0:
@@ -142,17 +140,20 @@ class tool_window(qtw.QMainWindow, Ui_MainWindow):
                 pass
             
             i = self.tabWidget.indexOf(self.new_tab)
-            print(i)
 
             # SAVES TAB WITH EMPTY LIST AS KEY VALUE PAIR IN .JSON SAVE FILE
             profiles[proName] = []
             with open('save.json', 'w') as outfile:
                 json.dump(profiles, outfile)
 
-
             # SETS NEW OBJECT NAMES FOR ITERATION PURPOSES
             self.new_tab.setObjectName(f"{proName}")
             self.newTab_listWidget.setObjectName(f"newTab_listWidget{i}")
+
+            self.tabWidget.setTabsClosable(True)
+            if len(profiles) > 2:
+                self.tabWidget.setUsesScrollButtons(True)
+            
         
 
     def add_app(self):
@@ -202,12 +203,6 @@ class tool_window(qtw.QMainWindow, Ui_MainWindow):
         current_tab_name = self.tabWidget.tabText(self.tabWidget.currentIndex())
         for app in profiles[current_tab_name]:
             os.startfile(app)
-
-    def test(self):
-        pass
-
-            
-
 
 
 if __name__ == '__main__':
