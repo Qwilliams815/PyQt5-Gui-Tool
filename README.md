@@ -1,6 +1,7 @@
 Simple on-startup program launching tool.
 
-Goals/features:
-- Improved UI/UX
-- Multiple profiles
-- Window location memory
+Project Features:
+- Utilizes the PyQt5 Designer tool and library.
+- Data storage in the form of json
+- File exploration dialog
+
